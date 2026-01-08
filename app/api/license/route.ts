@@ -7,8 +7,17 @@ import {
   hasActiveLicense,
 } from '@/lib/license-db';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+// Get Supabase client - deferred initialization to runtime
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey);
+}
 
 /**
  * Claim a free trial license
@@ -52,7 +61,7 @@ export async function POST(request: NextRequest) {
     console.log('[API] Claim trial request for user:', userId);
 
     // Initialize Supabase client with service role
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = getSupabaseClient();
 
     // Verify user exists in auth system
     console.log('[API] Verifying user exists...');

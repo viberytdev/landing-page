@@ -1,10 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+// Get Supabase client - deferred initialization to runtime
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Initialize Supabase client with service role (for server-side operations)
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey);
+}
 
 export interface StoreLicenseKeyParams {
   userId: string;
@@ -35,6 +41,7 @@ export async function hasActiveLicense(
   keyType?: 'trial' | 'lifetime' | 'demo'
 ): Promise<boolean> {
   try {
+    const supabase = getSupabaseClient();
     let query = supabase
       .from('license_keys')
       .select('id, expires_at, key_type, is_activated')
@@ -84,6 +91,7 @@ export async function storeLicenseKey(
   params: StoreLicenseKeyParams
 ): Promise<StoreLicenseKeyResult> {
   try {
+    const supabase = getSupabaseClient();
     const { userId, licenseKey, keyType, daysValid, deviceId } = params;
 
     // Validate inputs
@@ -180,6 +188,7 @@ export async function storeLicenseKey(
  */
 export async function getUserLicenseKey(userId: string) {
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('license_keys')
       .select('*')
@@ -211,6 +220,7 @@ export async function updateUserTrialStatus(
   daysValid: number = 7
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = getSupabaseClient();
     const trialEndDate = new Date();
     trialEndDate.setDate(trialEndDate.getDate() + daysValid);
 
@@ -247,6 +257,7 @@ export async function updateUserTrialStatus(
  */
 export async function createUserProfile(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = getSupabaseClient();
     const { error } = await supabase
       .from('user_profiles')
       .insert({

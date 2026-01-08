@@ -1,7 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+// Get Supabase client - deferred initialization to runtime
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey);
+}
 
 /**
  * Server-side authentication utilities
@@ -31,7 +40,7 @@ export async function verifyUserId(userId: string): Promise<AuthCheckResult> {
       };
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = getSupabaseClient();
 
     // Use the admin API to verify the user exists
     const { data, error } = await supabase.auth.admin.getUserById(userId);
@@ -78,7 +87,7 @@ export async function verifyToken(
       };
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = getSupabaseClient();
 
     // Verify the JWT token
     const { data, error } = await supabase.auth.getUser(token);
