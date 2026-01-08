@@ -1,8 +1,10 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Viberyt Landing Page
 
-## Getting Started
+AI-powered voice-to-text service landing page with integrated authentication, trial management, and payment processing.
 
-First, run the development server:
+## Quick Start
+
+Run the development server:
 
 ```bash
 npm run dev
